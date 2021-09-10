@@ -1,12 +1,12 @@
 'use strict'
 
+const cheerio = require('cheerio')
 const { mkdir, readdir } = require('fs/promises')
 const { createWriteStream, access } = require('fs')
 const { metadata } = require('./metadata')
 const config = require('./config')
 const { get } = require('./http')
 const { join } = require('path')
-const cheerio = require('cheerio')
 const { URL } = require('url')
 const { 
     sleep,
@@ -73,7 +73,7 @@ async function get_chapters(directory, document) {
         })
 
     for (const chapter of chapters)
-        await mkdir(chapter.directory)
+        await dorp_panic(mkdir(chapter.directory))
     return chapters
 }
 
@@ -104,9 +104,9 @@ async function chapter_handler({ href, directory }) {
  * @param {string} symbol - book symbol.
  * @param {string} router - book router.
  * @returns {Promise<void>}
- * @public
+ * @private
  */
-module.exports = async function(symbol, router) {
+async function book_handler(symbol, router) {
     const directory = path_relove(config.output, symbol)
     await access_dir(directory)
     
@@ -117,14 +117,24 @@ module.exports = async function(symbol, router) {
     )
     
     for (const chapter of chapters) {
-        if (!metadata[symbol]) {
+        if (!metadata[symbol]) 
             metadata[symbol] = []
-        }
-        
         await sleep(10000)
         metadata[symbol][chapter.index] = {
              size: await dorp_panic(chapter_handler(chapter)),
              name: chapter.title
          }
+    }
+}
+
+/**
+ * master handler.
+ * 
+ * @returns {Promise<void>}
+ * @public
+ */
+module.exports = async function() {
+    for (const key in config.books) {
+        await fetch(key, config.books[key].path)
     }
 }

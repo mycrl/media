@@ -1,7 +1,10 @@
 "use strict"
 
+require('./ready')
+    .ready()
+
 const express = require('express')
-const { metadata, poll } = require('./metadata')
+const { poll } = require('./metadata')
 const config = require('./config')
 const fetch = require('./fetch')
 
@@ -13,7 +16,10 @@ app.get('/:book', (req, res) => {
 
 app.listen(80)
 
-setInterval(async () => {
+async function handler() {
+    await fetch()
     await poll()
-    
-}, 60000 * 60 * 2)
+}
+//
+//setInterval(handler, 60000 * 60 * 2)
+handler() 

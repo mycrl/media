@@ -71,7 +71,7 @@ exports.dorp_panic = async function(promise) {
  * @public
  */
 exports.sleep = function(delay) {
-    return Promise(resolve => {
+    return new Promise(resolve => {
         setTimeout(resolve, delay)
     })
 }
