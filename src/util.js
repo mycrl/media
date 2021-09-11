@@ -75,3 +75,31 @@ exports.sleep = function(delay) {
         setTimeout(resolve, delay)
     })
 }
+
+/**
+ * retry handler.
+ * 
+ * @param {number} count - retry count.
+ * @param {function} handler
+ * @param {fcuntion?} catch_handler - catch handler.
+ * @returns {Promise<any>}
+ * @public
+ */
+exports.retey = async function (
+    count, 
+    handler, 
+    catch_handler, 
+    err = null
+) {
+    for (let i = 0; i < count; i++) {
+        try { 
+            return await handler() 
+        } catch (e) {
+            if (catch_handler)
+                await catch_handler()
+            err = e
+        }
+    }
+    
+    throw err
+}

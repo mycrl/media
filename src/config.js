@@ -11,6 +11,7 @@ const { path_relove } = require('./util')
 
 /**
  * @typedef {Object} Config
+ * @property {number} port - listen port.
  * @property {string} host - ikan hostname.
  * @property {string} user-agent - request user agent.
  * @property {object} books - book router list.

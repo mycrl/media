@@ -8,18 +8,29 @@ const config = require('./config')
  * @module ready
  */
 
-/*
+/**
+ * @readonly
+ */
+const OUTPUT = path_relove(config.output)
+const METADATA = path_relove(config.output, '.metadata.json')
+
+/**
+ * global Array last function.
  * 
+ * @returns {any}
+ * @global
+ */
+Array.prototype.last = function() { 
+    return this[this.length - 1] 
+}
+
+/*
+ * gloabl state ready.
+ * 
+ * @returns {void}
+ * @public
  */
 exports.ready = function() {
-    const output = path_relove(config.output)
-    const metadata = path_relove(config.output, '.metadata.json')
-    
-    try { accessSync(output) } catch {
-        mkdirSync(output)
-    }
-    
-    try { accessSync(metadata) } catch {
-        writeFileSync(metadata, '{}')
-    }
+    try { accessSync(OUTPUT) } catch { mkdirSync(OUTPUT) }
+    try { accessSync(METADATA) } catch { writeFileSync(METADATA, '{}') }
 }

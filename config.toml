@@ -1,3 +1,4 @@
+port = 8090
 host = "https://www.ikanmh.top"
 
 user-agent = """
@@ -7,7 +8,7 @@ Mobile/15E148 Safari/604.1\
 """
 
 output = "./output"
-page = "./page"
+page = "./view/dist"
 
 [books.lodge]
 title = "寄宿日記"

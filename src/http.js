@@ -3,6 +3,7 @@
 const ref_cell = require('ref_cell')
 const { Writable } = require('stream')
 const { connect, constants } = require('http2')
+const { retey, sleep } = require('./util')
 const config = require('./config')
 
 /** 
@@ -17,6 +18,16 @@ const config = require('./config')
 const session = ref_cell('session', () => {
     return connect(config.host)
 })
+
+/**
+ * reconnect remote server.
+ * 
+ * @returns {void}
+ * @private
+ */
+function reconnect() {
+    session = connect(config.host)
+}
 
 /**
  * join strean in finish.
@@ -84,7 +95,13 @@ function read_to_buffer(readable, buf = Buffer.alloc(0)) {
  * @public
  */
 exports.get = async function(router, writable) {
-    const res = await create_req(router)
+    const res = await retey(3, 
+        async () => await create_req(router), 
+        async () => {
+            await sleep(10000)
+            reconnect()
+        })
+
     return writable instanceof Writable ?
         await join_stream(res, writable) :
         await read_to_buffer(res)

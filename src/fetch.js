@@ -47,17 +47,55 @@ function access_dir(directory) {
  */
 
 /**
+ * get cover.
+ * 
+ * @param {string} directory - output directory.
+ * @param {Document} document
+ * @returns {Promise<void>}
+ * @private
+ */
+async function get_cover(directory, document) {
+    const filename = join(directory, 'cover.jpg')
+    const nodes = document('.detail-main-cover img')
+    const cover = document(nodes[0]).attr('data-original')
+    
+    /**
+     * determine whether the file already exists,
+     * download the cover image if it does not exist.
+     */
+    try {
+        await access(filename) 
+    } catch (_) {
+        await get(
+            new URL(cover).pathname, 
+            createWriteStream(filename)
+        )
+    }
+}
+
+/**
  * get chapter list.
  * 
+ * @param {string} symbol - book symbol.
  * @param {string} directory - output directory.
  * @param {Document} document
  * @returns {Promise<Chapter[]>}
  * @private
  */
-async function get_chapters(directory, document) {
+async function get_chapters(symbol, directory, document) {
     const nodes = document('#detail-list-select li a')
     const dirs = await readdir(directory)
     
+    /**
+     * get book cover href
+     * download and save to directory.
+     */
+    await get_cover(
+        directory, 
+        document
+    )
+    
+    // get chapter list.
     const chapters = iter_to_array(nodes)
         .map((node, index) => {
             const title = path_filter(document(node).text())
@@ -68,13 +106,30 @@ async function get_chapters(directory, document) {
                 title
             }
         })
-        .filter(({ title }) => {
-            return !dirs.includes(title)
-        })
+    
+    // save book info to metadata.
+    for (const { title, index } of chapters) {
+        const files = await readdir(join(directory, title))
+        if (!metadata[symbol]) 
+            metadata[symbol] = []
+        metadata[symbol][index] = {
+             size: files.length,
+             title
+        }
+    }
+    
+    // filter download done chapter.
+    const tasks = chapters.filter(({ title }) => {
+        return !dirs.includes(title)
+    })
 
-    for (const chapter of chapters)
+    /**
+     * create chapter directory
+     * and return chapter list.
+     */
+    for (const chapter of tasks)
         await dorp_panic(mkdir(chapter.directory))
-    return chapters
+    return tasks
 }
 
 /**
@@ -87,6 +142,11 @@ async function get_chapters(directory, document) {
 async function chapter_handler({ href, directory }) {
     const chapter_page = cheerio.load(await get(href))
     const nodes = chapter_page('#cp_img img')
+    
+    /**
+     * get image list
+     * and create download task.
+     */
     const tasks = iter_to_array(nodes)
         .map((node, index) => {
             const href = chapter_page(node).attr('data-original')
@@ -110,20 +170,20 @@ async function book_handler(symbol, router) {
     const directory = path_relove(config.output, symbol)
     await access_dir(directory)
     
-    const book_page = cheerio.load(await get(router))
+    // get chapter list.
     const chapters = await get_chapters(
+        symbol,
         directory, 
-        book_page
+        cheerio.load(await get(router))
     )
     
+    /**
+     * loop of all chapter
+     * and save chapter info to metadata  object.
+     */
     for (const chapter of chapters) {
-        if (!metadata[symbol]) 
-            metadata[symbol] = []
+        await dorp_panic(chapter_handler(chapter))
         await sleep(10000)
-        metadata[symbol][chapter.index] = {
-             size: await dorp_panic(chapter_handler(chapter)),
-             name: chapter.title
-         }
     }
 }
 
@@ -133,8 +193,8 @@ async function book_handler(symbol, router) {
  * @returns {Promise<void>}
  * @public
  */
-module.exports = async function() {
+exports.poll = async function() {
     for (const key in config.books) {
-        await fetch(key, config.books[key].path)
+        await book_handler(key, config.books[key].path)
     }
 }

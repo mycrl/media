@@ -1,25 +1,65 @@
-"use strict"
+'use strict'
 
+/**
+ * global init,
+ * initialization file and environment.
+ */
 require('./ready')
     .ready()
 
-const express = require('express')
-const { poll } = require('./metadata')
+/**
+ * start main poll.
+ */
+require('./poll')
+    .start()
+
+const { metadata } = require('./metadata')
+const { path_relove } = require('./util')
+const { Application } = require('./app')
 const config = require('./config')
-const fetch = require('./fetch')
+const path = require('path')
 
-const app = express()
+/**
+ * create application,
+ * and set assets and page directory.
+ */
+const app = new Application()
+    .static(path_relove(config.page))
+    .static('/assets', path_relove(config.output))
+    .listen(config.port)
+    .launch()
 
-app.get('/:book', (req, res) => {
-    res.send(metadata[req.params.book])
+/**
+ * get book info,
+ * contains basic information.
+ */
+app.get('/api/book/:book', ({ params }) => { 
+    return { 
+        chapters: metadata[params.book], 
+        ...config.books[params.book] 
+    }
 })
 
-app.listen(80)
+/**
+ * get book list,
+ * only basic information.
+ */
+app.get('/api/books', () => {
+    return Object
+        .entries(config.books)
+        .map(([key, value]) => ({
+            update: metadata[key].last(),
+            ...value,
+            key
+        }))
+})
 
-async function handler() {
-    await fetch()
-    await poll()
-}
-//
-//setInterval(handler, 60000 * 60 * 2)
-handler() 
+/**
+ * web page routing processing,
+ * all routes point to index.html.
+ */
+app.get('/*', (_, res) => {
+    const index = path.join(config.page, 'index.html')
+    const resolve = path_relove(index)
+    res.sendFile(resolve)
+})
