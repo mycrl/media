@@ -31,12 +31,9 @@
                 books: {}
             }
         },
-        mounted() {
-            fetch('/api/books')
+        async mounted() {
+            this.books = await fetch('/api/books')
                 .then(res => res.json())
-                .then(books => {
-                    this.books = books
-                })
         }
     })
 </script>
@@ -59,6 +56,7 @@
         box-shadow: 0 0 5px 2px #ddd;
         padding-bottom: 10px;
         display: block;
+        border-radius: 10px;
     }
     
     .Index .item .book div {
@@ -66,6 +64,7 @@
         height: 30vh;
         background-size: cover;
         background-position: 50%;
+        border-radius: 10px 10px 0 0;
     }
     
     .Index .item .book p {

@@ -2,23 +2,25 @@
     <div class="Chapter">
         <div 
             class="controls"
+            v-if="book != null"
             v-show="controls"
         >
             <div @click="list">目录</div>
             <div 
-                v-if="index < (count - 1)"
+                v-if="index < (book.chapters.length - 1)"
                 @click="next"
             >下章</div>
             <div @click="top">顶部</div>
         </div>
         <div
+            v-if="book != null"
             ref="images"
             class="images"
             @click="click"
         >
             <img 
-                v-for="(img, i) of images"
-                :src="img"
+                v-for="(_, i) of new Array(book.chapters[index].size).fill(0)"
+                :src="`/assets/${key}/${book.chapters[index].title}/${i}.jpg`"
                 :key="i"
             />
         </div>
@@ -34,8 +36,7 @@
                 key: this.$route.params.key,
                 index: Number(this.$route.params.index),
                 controls: false,
-                images: [],
-                count: 0,
+                book: null
             }
         },
         async beforeRouteUpdate(to, _, next) {
@@ -61,18 +62,12 @@
             click() {
                 this.controls = !this.controls
             },
-            fetch() {
-                return fetch('/api/book/' + this.key)
+            async fetch() {
+                this.book = await fetch('/api/book/' + this.key)
                     .then(res => res.json())
-                    .then(book => {
-                        const { size, title } = book.chapters[this.index]
-                        this.count = book.chapters.length
-                        this.images = new Array(size)
-                            .fill('')
-                            .map((_, i) => {
-                                return `/assets/${this.key}/${title}/${i}.jpg`
-                            })
-                    })
+                document.title = this.book
+                    .chapters[this.index]
+                    .title
             }
         },
         mounted() {
