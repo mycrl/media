@@ -107,17 +107,6 @@ async function get_chapters(symbol, directory, document) {
             }
         })
     
-    // save book info to metadata.
-    for (const { title, index } of chapters) {
-        const files = await readdir(join(directory, title))
-        if (!metadata[symbol]) 
-            metadata[symbol] = []
-        metadata[symbol][index] = {
-             size: files.length,
-             title
-        }
-    }
-    
     // filter download done chapter.
     const tasks = chapters.filter(({ title }) => {
         return !dirs.includes(title)
@@ -129,6 +118,18 @@ async function get_chapters(symbol, directory, document) {
      */
     for (const chapter of tasks)
         await dorp_panic(mkdir(chapter.directory))
+    
+    // save book info to metadata.
+    for (const { title, index } of chapters) {
+        const files = await readdir(join(directory, title))
+        if (!metadata[symbol]) 
+            metadata[symbol] = []
+        metadata[symbol][index] = {
+             size: files.length,
+             title
+        }
+    }
+    
     return tasks
 }
 
@@ -182,7 +183,8 @@ async function book_handler(symbol, router) {
      * and save chapter info to metadata  object.
      */
     for (const chapter of chapters) {
-        await dorp_panic(chapter_handler(chapter))
+        metadata[symbol][chapter.index].size = 
+            await dorp_panic(chapter_handler(chapter))
         await sleep(10000)
     }
 }

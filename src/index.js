@@ -1,5 +1,8 @@
 'use strict'
 
+// set process title.
+process.title = 'ikan_reptile'
+
 /**
  * global init,
  * initialization file and environment.

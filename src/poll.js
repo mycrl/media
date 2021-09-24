@@ -9,14 +9,24 @@ const fetch = require('./fetch')
  */
 
 /**
+ * work handler.
+ * 
+ * @returns {Promise<void>}
+ * @private
+ */
+async function handler() {
+    await fetch.poll()
+    await metadata.poll()
+}
+
+/**
  * main poll.
  * 
  * @returns {Promise<void>}
  * @private
  */
 async function poll() {
-    await fetch.poll()
-    await metadata.poll()
+    await dorp_panic(handler())
 }
 
 /**
@@ -25,6 +35,7 @@ async function poll() {
  * @returns {void}
  * @public
  */
-exports.start = () => setInterval(async () => {
-    await dorp_panic(poll)
-}, 60000 * 60 * 24)
+exports.start = function () {
+    setInterval(poll, 60000 * 60 * 24)
+    poll()
+}
