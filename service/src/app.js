@@ -28,6 +28,8 @@ function hooks(err, _req, res, _next) {
 exports.Application = class Application {
     constructor() {
         this.inner = express()
+        this.inner.use(express.json())
+        this.inner.use(express.urlencoded({ extended: true }))
     }
 
     /**

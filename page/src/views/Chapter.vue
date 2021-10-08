@@ -2,25 +2,24 @@
     <div class="Chapter">
         <div 
             class="controls"
-            v-if="book != null"
-            v-show="controls"
+            :id="controls && 'show'"
         >
             <div @click="list">目录</div>
             <div 
-                v-if="index < (book.chapters.length - 1)"
+                v-if="index < (chapters.length - 1)"
                 @click="next"
             >下章</div>
             <div @click="top">顶部</div>
         </div>
         <div
-            v-if="book != null"
             ref="images"
             class="images"
             @click="click"
+            v-if="chapters.length > 0"
         >
             <img 
-                v-for="(_, i) of new Array(book.chapters[index].size).fill(0)"
-                :src="`/assets/${key}/${book.chapters[index].title}/${i}.jpg`"
+                v-for="(_, i) of new Array(chapters[index].size).fill(0)"
+                :src="api.getImage(key, chapters[index].name, i)"
                 :key="i"
             />
         </div>
@@ -31,12 +30,15 @@
     import { defineComponent } from 'vue'
     
     export default defineComponent({
+        inject: [
+            'api'  
+        ],
         data() {
             return {
                 key: this.$route.params.key,
                 index: Number(this.$route.params.index),
                 controls: false,
-                book: null
+                chapters: []
             }
         },
         async beforeRouteUpdate(to, _, next) {
@@ -63,11 +65,9 @@
                 this.controls = !this.controls
             },
             async fetch() {
-                this.book = await fetch('/api/book/' + this.key)
-                    .then(res => res.json())
-                document.title = this.book
-                    .chapters[this.index]
-                    .title
+                const { chapters } = await this.api.getBookProfile(this.key)
+                document.title = chapters[this.index].name
+                this.chapters = chapters
             }
         },
         mounted() {
@@ -77,13 +77,27 @@
 </script>
 
 <style scoped>
-    .Chapter .images {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        overflow-y: auto;
+    
+    @media (max-width: 500px) {
+        .Chapter .images {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow-y: auto;
+        }   
+    }
+    
+    @media (min-width: 500px) {
+        .Chapter .images {
+            width: 450px;
+            height: 100%;
+            overflow-y: auto;
+            margin: 0 auto;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
     }
     
     .Chapter .images img {
@@ -94,18 +108,23 @@
     .controls {
         position: fixed;
         z-index: 20;
-        bottom: 20px;
-        right: 20px;
+        bottom: -41px;
+        left: 0;
+        width: 100%;
+        height: 40px;
+        background-color: #fff;
+        border-top: 1px solid #ddd;
+        display: flex;
+        transition: 0.3s;
     }
     
     .controls div {
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        background-color: #fff;
-        border: 1px solid #ddd;
-        text-align: center;
+        flex: 1;
         line-height: 40px;
-        margin-top: 10px;
+        text-align: center;
+    }
+    
+    #show {
+        bottom: 0;
     }
 </style>

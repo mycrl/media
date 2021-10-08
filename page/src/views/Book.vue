@@ -4,25 +4,28 @@
             <div 
                 class="image"
                 :style="{ 
-                    backgroundImage: `url(/assets/${key}/cover.jpg)`
+                    backgroundImage: `url(${api.getCover(key)})`
                 }"
             />
             <router-link
                 class="home"
                 to="/"
             >首页</router-link>
-            <p class="title">
-                {{ book.title }}
-            </p>
+            <p>{{ book.name }}</p>
+        </div>
+        <div class="info">
+            {{ book.summary }}
         </div>
         <div class="box">
             <div class="chapters">
                 <router-link 
-                    v-for="(chapter, i) of book.chapters"
-                    :key="chapter.title"
+                    v-for="(chapter, i) of chapters"
+                    :key="chapter.name"
                     :to="`/chapter/${key}/${i}`"
                 >
-                    {{ chapter.title }}
+                    <span>{{ chapter.name }}</span>
+                    <span>{{ new Date(chapter.create_by)
+                        .toString('MM-dd HH:mm') }}</span>
                 </router-link>
             </div>
         </div>
@@ -33,16 +36,22 @@
     import { defineComponent } from 'vue'
     
     export default defineComponent({
+        inject: [
+            'api'
+        ],
         data() {
             return {
                 key: this.$route.params.key,
-                book: {}
+                book: {},
+                chapters: []
             }
         },
-        async mounted() {
-            this.book = await fetch('/api/book/' + this.key)
-                .then(res => res.json())
-            document.title = this.book.title
+        mounted() {
+            this.api.getBookProfile(this.key).then(({ book, chapters }) => {
+                document.title = book.name
+                this.chapters = chapters
+                this.book = book
+            })
         }
     })
 </script>
@@ -72,7 +81,7 @@
         filter: blur(1px);
     }
     
-    .Book .cover .title {
+    .Book .cover p {
         font-weight: 700;
         font-size: 1.5rem;
         color: #000;
@@ -81,14 +90,30 @@
         bottom: 20px;
     }
     
+    .Book .info {
+        color: #555;
+        padding: 20px;
+        background-color: #eee;
+    }
+    
     .Book .chapters {
         padding-bottom: 50px;
     }
     
     .Book .chapters a {
-        display: block;
+        display: flex;
         line-height: 20px;
         border-top: 1px solid #eee;
         padding: 10px 20px;
+    }
+    
+    .Book .chapters a span {
+        flex: auto; 
+    }
+    
+    .Book .chapters a span:last-of-type {
+        text-align: right;
+        color: #999;
+        width: 20%;
     }
 </style>

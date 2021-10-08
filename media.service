@@ -1,0 +1,14 @@
+[Unit]
+Description=media service.
+Documentation=https://github.com/mycrl
+
+[Service]
+ExecStartPre=/bin/sleep 10
+ExecStart=node /etc/media/service
+ExecReload=node /etc/media/service
+ExecStop=killall media
+TimeoutStartSec=0
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,14 +1,10 @@
 #!/bin/bash
 
-cp -r ./* /etc/ikan-reptile/
-cd /etc/ikan-reptile
-
 npm i
-cd view
-npm i
+cd page
 npm run build
 cd ../
 
-cp ./ikan.service /etc/systemd/system/ikan.service
-systemctl enable ikan.service
-systemctl start ikan.service
+cp ./media.service /etc/systemd/system/media.service
+systemctl enable media.service
+systemctl start media.service
