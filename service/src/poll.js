@@ -1,6 +1,14 @@
 'use strict'
 
-const { ikan } = require('./fetch')
+/**
+ * global init,
+ * initialization file and environment.
+ */
+require('./ready')
+    .ready()
+
+const ikan = require('./adapter/ikan')
+const config = require('./common/config')
 
 /** 
  * @module poll
@@ -14,6 +22,7 @@ const { ikan } = require('./fetch')
  */
 async function poll() {
     await Promise.ignore(ikan.poll())
+    process.exit(0)
 }
 
 /**
@@ -22,7 +31,4 @@ async function poll() {
  * @returns {void}
  * @public
  */
-exports.start = function () {
-    setInterval(poll, 60000 * 60 * 24)
-    poll()
-}
+poll()

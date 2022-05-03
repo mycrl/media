@@ -2,7 +2,7 @@
 
 const fs = require('fs')
 const { join } = require('path')
-const config = require('./config')
+const config = require('./common/config')
 
 /** 
  * @module ready

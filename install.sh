@@ -1,9 +1,7 @@
 #!/bin/bash
 
 npm i
-cd page
-npm run build
-cd ../
+npm run build --workspace=page
 
 cp ./media.service /etc/systemd/system/media.service
 systemctl enable media.service

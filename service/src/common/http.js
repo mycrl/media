@@ -1,7 +1,6 @@
 'use strict'
 
 const axios = require('axios')
-const ref_cell = require('ref_cell')
 const { Writable } = require('stream')
 const { connect, constants } = require('http2')
 const config = require('./config')
@@ -58,6 +57,20 @@ exports.Http2 = class Http2 {
     constructor(host) {
         this._session = connect(host)
         this._host = host
+        this._catch()
+    }
+    
+    /**
+     * catch session error.
+     * 
+     * @returns {Promise<void>}
+     * @private
+     */
+    _catch() {
+        this._session.on('error', (e) => {
+            console.error(e)
+            this.reconnect()
+        })
     }
     
     /**
@@ -86,6 +99,7 @@ exports.Http2 = class Http2 {
         return new Promise((resolve, reject) => {
             const req = this._request(router)
             req.on('response', () => resolve(req))
+            req.on('timeout', reject)
             req.on('error', reject)
         })
     }
@@ -115,7 +129,7 @@ exports.Http2 = class Http2 {
      async get(router, writable) {
         return await this._res(await Promise.retey(3, 
             () => this._from(router),
-            () =>  this.reconnect()
+            () => this.reconnect()
         ), writable)
     }
     
@@ -126,8 +140,10 @@ exports.Http2 = class Http2 {
      * @public
      */
     async reconnect() {
+        await this.close()
         await Date.sleep(10000)
         this._session = connect(this._host)
+        this._catch()
     }
         
     /**

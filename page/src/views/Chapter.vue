@@ -42,7 +42,10 @@
             }
         },
         async beforeRouteUpdate(to, _, next) {
-            this.$refs.images.scrollTop = 0
+            setTimeout(() => {
+                this.$refs.images.scrollTop = 0
+            }, 500)
+            
             this.index = Number(to.params.index)
             this.key = to.params.key
             await this.fetch()
@@ -77,28 +80,10 @@
 </script>
 
 <style scoped>
-    
-    @media (max-width: 500px) {
-        .Chapter .images {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            overflow-y: auto;
-        }   
-    }
-    
-    @media (min-width: 500px) {
-        .Chapter .images {
-            width: 450px;
-            height: 100%;
-            overflow-y: auto;
-            margin: 0 auto;
-            border-left: 1px solid #ddd;
-            border-right: 1px solid #ddd;
-        }
-    }
+   .Chapter .images {
+        width: 100%;
+        overflow-y: auto;
+    }   
     
     .Chapter .images img {
         width: 100%;

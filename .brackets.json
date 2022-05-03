@@ -1,0 +1,10 @@
+{
+    "brackets-file-tree-exclude.excludeList": [
+        "/.git/",
+        "/dist/",
+        "/bower_components/",
+        "/node_modules/",
+        "/target/",
+        "/output"
+    ]
+}

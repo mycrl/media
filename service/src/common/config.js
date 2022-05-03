@@ -15,6 +15,6 @@ const ref_cell = require('ref_cell')
  * @property {string} page - web page directory.
  * @readonly
  */
-export default ref_cell('config', () => {
+module.exports = ref_cell('config', () => {
     return require('../../config.js')
 })

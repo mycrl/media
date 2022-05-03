@@ -1,6 +1,6 @@
 import Axios from "axios"
 
-const Host = 'http://ikan.redir.com'
+const Host = ''
 
 const axios = Axios.create({
     validateStatus: (status) => status == 200,

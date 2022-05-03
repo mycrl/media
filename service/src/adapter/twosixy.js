@@ -1,14 +1,14 @@
 'use strict'
 
+const { join } = require('path')
 const iconv = require('iconv-lite')
 const cheerio = require('cheerio')
 const ref_cell = require('ref_cell')
 const { createWriteStream } = require('fs')
-const storage = require('./storage')
-const { Http } = require('./http')
-const config = require('./config')
-const { join } = require('path')
-const { mkdir } = require('./base')
+const storage = require('../common/storage')
+const { Http } = require('../common/http')
+const config = require('../common/config')
+const { mkdir } = require('./common/util')
 
 /** 
  * @module factory/twosixy
@@ -19,7 +19,7 @@ const { mkdir } = require('./base')
  * 
  * @class
  */
- class Twosixy {
+module.exports = ref_cell('twosixy', () => new class Twosixy {
     
     /**
      * @constructor
@@ -46,7 +46,9 @@ const { mkdir } = require('./base')
          */
         const tasks = Array.extends(nodes)
             .map((node, index) => {
-                const href = document(node).attr('ess-data')
+                const href = document(node)
+                    .attr('ess-data')
+                    .replace('vxotu.com', 'vxotu.top')
                 const writable = createWriteStream(join(directory, `${index}.jpg`))
                 return this._http.get(href, writable)
             })
@@ -68,9 +70,9 @@ const { mkdir } = require('./base')
      * @public
      */
     async download(url) {
-        const document = cheerio.load(iconv.decode(
-            await this._http.get(url), 'GB18030'
-        ))
+        const document = cheerio.load(
+            await this._http.get(url)
+        )
         
         /**
          * get photo name,
@@ -95,13 +97,4 @@ const { mkdir } = require('./base')
             size,
         })
     }
-}
-
-/**
- * t66y
- * 
- * @readonly
- */
-module.exports = ref_cell('twosixy', () => {
-    return new Twosixy()
 })

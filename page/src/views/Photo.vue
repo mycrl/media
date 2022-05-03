@@ -1,10 +1,12 @@
 <template>
     <div class="Photo">
-        <img
+        <a
             v-for="i of new Array(size).fill(0).map((_, i) => i)"
-            :src="api.getPhoto(key, i)"
+            :href="api.getPhoto(key, i)"
             :key="i"
-        />
+        >
+            <img :src="api.getPhoto(key, i)"/>
+        </a>
     </div>
 </template>
 
@@ -22,7 +24,10 @@
             }
         },
         async beforeRouteUpdate(to, _, next) {
-            this.$refs.images.scrollTop = 0
+            setTimeout(() => {
+                this.$refs.images.scrollTop = 0
+            }, 500)
+            
             this.size = Number(to.params.size)
             this.key = to.params.key
             next()

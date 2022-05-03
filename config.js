@@ -9,7 +9,7 @@ const { join } = require('path')
  */
 const proxy = {
     protocol: 'http',
-    host: '192.168.3.2',
+    host: '127.0.0.1',
     port: 7890,
 }
 
@@ -18,14 +18,24 @@ const proxy = {
  * 
  * @readonly
  */
-const books = [
+const ikan = [
     479,
     506,
     478,
     520,
     412,
     492,
-    87
+    87,
+    527
+]
+
+/**
+ * jmwu books.
+ * 
+ * @readonly
+ */
+const jmwu = [
+    695
 ]
 
 /**
@@ -35,9 +45,10 @@ const books = [
  */
 module.exports = {
     port: 8090,
-    host: 'https://www.ikanmh.top',
+    loop: 60000 * 60 * 6,
     output: join(__dirname, './output'),
     page: join(__dirname, './page/dist'),
-    books,
-    proxy 
+    jmwu,
+    ikan,
+    proxy
 }

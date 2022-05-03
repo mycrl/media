@@ -116,4 +116,19 @@
         color: #999;
         width: 20%;
     }
+    
+@media screen and (min-width: 500px) {
+    .Book .chapters {
+        display: table;
+        width: 100%;
+    }
+    
+    .Book .chapters a {
+        float: left;
+        width: 20%;
+        border-right: 1px solid #eee;
+        padding: 0;
+        line-height: initial;
+    }
+}
 </style>
